@@ -1,9 +1,8 @@
 package main
 
 import (
-    "gosynth/modules/phasor"
+    "gosynth/modules/operator"
     "gosynth/io/alsa"
-    "math"
     "fmt"
     "os"
 )
@@ -24,37 +23,30 @@ func main() {
      data := make([]byte, 2*2*bufferSize)
 
      // modules
-     carrier := phasor.New(0.0, 0.0)
-     carrier.SetPhaseIncrement(carrier.FrequencyToPhaseIncrement(60.0, float64(sampleRate)))
-     
-     modulator := phasor.New(0.0, 0.0)
-     modulator.SetPhaseIncrement(modulator.FrequencyToPhaseIncrement(120.0, float64(sampleRate)))
+     carrier := operator.New(0.0, 80.0, float64(sampleRate))
+     modulator := operator.New(0.0, 160.0, float64(sampleRate))
+     lfo := operator.New(0.0, 0.1, float64(sampleRate))
+     lfo2 := operator.New(0.0, 0.0667, float64(sampleRate))
 
-     lfo := phasor.New(0.0, 0.0)
-     lfo.SetPhaseIncrement(lfo.FrequencyToPhaseIncrement(0.1, float64(sampleRate)))
-
-     lfo2 := phasor.New(0.0, 0.0)
-     lfo2.SetPhaseIncrement(lfo.FrequencyToPhaseIncrement(0.03, float64(sampleRate)))
-
+     var phasemod float64 = 0.0
      var out float64 = 0.0
-
+     
      for {
      	 // synthesize audio buffer
      	 for i := 0; i < bufferSize; i++ {
 	     // compute output sample
-	     phase := carrier.GetPhase()
-	     phase += math.Sin(modulator.GetPhase()) * (3.5 + 2.5 * math.Sin(lfo.GetPhase()))
-
-	     // operator phase feedback
-	     phase += out * (0.5 + 0.5 * math.Sin(lfo2.GetPhase()))
+	     phasemod = modulator.GetOutput() *
+	     		(8.0 + 8.0 * lfo.GetOutput())
+	     phasemod += out * (0.5 + 0.5 * lfo2.GetOutput())
+	     carrier.SetPhaseModulation(phasemod)
 	     
 	     // tick all states
      	     carrier.Tick()
      	     modulator.Tick()
-     	     lfo.Tick()	     
-     	     lfo2.Tick()	     
+     	     lfo.Tick()
+     	     lfo2.Tick()
 	     
-	     out = math.Sin(phase)
+	     out = carrier.GetOutput()
 
 	     // write output to driver
 	     b := int16(out * 0.1 * 32767)

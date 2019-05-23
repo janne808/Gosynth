@@ -4,7 +4,7 @@ import (
      "math"
 )
 
-type phasor struct {
+type Phasor struct {
      // phase increment per tick
      phaseIncrement float64
      
@@ -13,13 +13,13 @@ type phasor struct {
 }
 
 // constructor
-func New(phaseIncrement float64, phase float64) phasor {
-     p := phasor { phaseIncrement, phase }
+func New(phaseIncrement float64, phase float64) Phasor {
+     p := Phasor { phaseIncrement, phase }
      return p
 }
 
 // tick over one sample
-func (p *phasor) Tick() {
+func (p *Phasor) Tick() {
      // increment phase
      p.phase += p.phaseIncrement
 
@@ -29,17 +29,17 @@ func (p *phasor) Tick() {
      }
 }
 
-// convert frequency
-func (p phasor) FrequencyToPhaseIncrement(frequency float64, samplingFrequency float64) float64 {
-     return 2.0*math.Pi*frequency/samplingFrequency
+// set frequency
+func (p *Phasor) SetFrequency(frequency float64, samplingFrequency float64) {
+     p.phaseIncrement = 2.0*math.Pi*frequency/samplingFrequency
 }
 
 // set phasor phase increment
-func (p *phasor) SetPhaseIncrement(phaseIncrement float64) {
+func (p *Phasor) SetPhaseIncrement(phaseIncrement float64) {
      p.phaseIncrement = phaseIncrement
 }
 
 // get phasor phase
-func (p phasor) GetPhase() float64 {
+func (p Phasor) GetPhase() float64 {
      return p.phase
 }
