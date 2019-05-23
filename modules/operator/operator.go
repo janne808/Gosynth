@@ -13,9 +13,15 @@ type Operator struct {
 
 // constructor
 func New(phaseModulation float64, frequency float64, sampleRate float64) Operator {
+     // instantiate phasor
      p := phasor.New(0.0, 0.0)
-     op := Operator { p: p, frequency: 0.0, phaseModulation: phaseModulation }
-     op.SetFrequency(frequency, sampleRate)
+     
+     // instantiate operator
+     op := Operator { p: p, frequency: frequency, phaseModulation: phaseModulation }
+
+     // init phasor frequency
+     op.p.SetFrequency(frequency, sampleRate)
+     
      return op
 }
 
